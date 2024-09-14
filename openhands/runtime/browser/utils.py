@@ -34,6 +34,9 @@ async def browse(
             content=obs['text_content'],  # text content of the page
             url=obs.get('url', ''),  # URL of the page
             screenshot=obs.get('screenshot', None),  # base64-encoded screenshot, png
+            set_of_marks=obs.get(
+                'set_of_marks', None
+            ),  # base64-encoded Set-of-Marks, png
             open_pages_urls=obs.get('open_pages_urls', []),  # list of open pages
             active_page_index=obs.get(
                 'active_page_index', -1
@@ -54,6 +57,7 @@ async def browse(
         return BrowserOutputObservation(
             content=str(e),
             screenshot='',
+            set_of_marks='',
             error=True,
             last_browser_action_error=str(e),
             url=asked_url if action.action == ActionType.BROWSE else '',

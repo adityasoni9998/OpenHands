@@ -10,6 +10,7 @@ class BrowserOutputObservation(Observation):
 
     url: str
     screenshot: str = field(repr=False)  # don't show in repr
+    set_of_marks: str = field(repr=False)  # don't show in repr
     error: bool = False
     observation: str = ObservationType.BROWSE
     # do not include in the memory

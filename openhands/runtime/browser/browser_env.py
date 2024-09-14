@@ -11,7 +11,7 @@ import gymnasium as gym
 import html2text
 import numpy as np
 import tenacity
-from browsergym.utils.obs import flatten_dom_to_str
+from browsergym.utils.obs import flatten_dom_to_str, overlay_som
 from PIL import Image
 
 from openhands.core.exceptions import BrowserInitException
@@ -140,7 +140,15 @@ class BrowserEnv:
                     html_str = flatten_dom_to_str(obs['dom_object'])
                     obs['text_content'] = self.html_text_converter.handle(html_str)
                     # make observation serializable
-                    obs['screenshot'] = self.image_to_png_base64_url(obs['screenshot'])
+                    obs['set_of_marks'] = self.image_to_png_base64_url(
+                        overlay_som(
+                            obs['screenshot'], obs.get('extra_element_properties', {})
+                        ),
+                        add_data_prefix=True,
+                    )
+                    obs['screenshot'] = self.image_to_png_base64_url(
+                        obs['screenshot'], add_data_prefix=True
+                    )
                     obs['active_page_index'] = obs['active_page_index'].item()
                     obs['elapsed_time'] = obs['elapsed_time'].item()
                     self.browser_side.send((unique_request_id, obs))
