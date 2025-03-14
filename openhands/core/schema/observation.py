@@ -49,5 +49,11 @@ class ObservationTypeSchema(BaseModel):
     CONDENSE: str = Field(default='condense')
     """Result of a condensation operation."""
 
+    SEARCH: str = Field(default='search')
+    """Result of querying a search engine."""
+
+    DOWNLOAD: str = Field(default='download')
+    """Result of downloading/opening a file via the browser"""
+
 
 ObservationType = ObservationTypeSchema()
