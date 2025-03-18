@@ -36,6 +36,7 @@ from openhands.events.action import (
     Action,
     BrowseInteractiveAction,
     BrowseURLAction,
+    ChatAction,
     CmdRunAction,
     FileEditAction,
     FileReadAction,
@@ -463,6 +464,9 @@ class ActionExecutor:
 
     async def browse_interactive(self, action: BrowseInteractiveAction) -> Observation:
         return await browse(action, self.browser)
+
+    async def chat(self, action: ChatAction):
+        return None
 
     def close(self):
         self.memory_monitor.stop_monitoring()

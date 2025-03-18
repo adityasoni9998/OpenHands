@@ -85,5 +85,8 @@ class ActionTypeSchema(BaseModel):
     RECALL: str = Field(default='recall')
     """Retrieves content from a user workspace, microagent, or other source."""
 
+    CHAT: str = Field(default='chat')
+    """Chat with a Sotopia NPC via Sotopia's web-socket API."""
+
 
 ActionType = ActionTypeSchema()

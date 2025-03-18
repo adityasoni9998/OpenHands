@@ -9,6 +9,7 @@ from openhands.events.observation.agent import (
     RecallObservation,
 )
 from openhands.events.observation.browse import BrowserOutputObservation
+from openhands.events.observation.chat import ChatObservation
 from openhands.events.observation.commands import (
     CmdOutputMetadata,
     CmdOutputObservation,
@@ -44,6 +45,7 @@ observations = (
     AgentCondensationObservation,
     AgentThinkObservation,
     RecallObservation,
+    ChatObservation,
 )
 
 OBSERVATION_TYPE_TO_CLASS = {
