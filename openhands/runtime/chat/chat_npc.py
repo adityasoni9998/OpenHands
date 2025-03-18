@@ -1,9 +1,7 @@
 from openhands.events.action import ChatAction
 
 STARTED_SIM: bool = False
-SCENARIOS_FILE: str = (
-    '/workspace/scenarios.json'  # assumed this is saved inside docker container
-)
+SCENARIOS_FILE: str = '/workspace/scenarios.json'  # assumed this is saved beforehand inside docker container
 
 
 # async def setup_websocket(self) -> None:

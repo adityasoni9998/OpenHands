@@ -19,6 +19,7 @@ from openhands.events.action import (
     AgentThinkAction,
     BrowseInteractiveAction,
     BrowseURLAction,
+    ChatAction,
     CmdRunAction,
     FileEditAction,
     FileReadAction,
@@ -295,6 +296,9 @@ class ActionExecutionClient(Runtime):
         return self.send_action_for_execution(action)
 
     def browse_interactive(self, action: BrowseInteractiveAction) -> Observation:
+        return self.send_action_for_execution(action)
+
+    def chat(self, action: ChatAction) -> Observation:
         return self.send_action_for_execution(action)
 
     def close(self) -> None:
