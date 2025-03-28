@@ -18,6 +18,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from zipfile import ZipFile
 
+import puremagic
 from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
@@ -41,11 +42,13 @@ from openhands.events.action import (
     FileReadAction,
     FileWriteAction,
     IPythonRunCellAction,
+    SearchAction,
 )
 from openhands.events.event import FileEditSource, FileReadSource
 from openhands.events.observation import (
     CmdOutputObservation,
     ErrorObservation,
+    FileDownloadObservation,
     FileEditObservation,
     FileReadObservation,
     FileWriteObservation,
@@ -56,6 +59,7 @@ from openhands.events.serialization import event_from_dict, event_to_dict
 from openhands.runtime.browser import browse
 from openhands.runtime.browser.browser_env import BrowserEnv
 from openhands.runtime.plugins import ALL_PLUGINS, JupyterPlugin, Plugin, VSCodePlugin
+from openhands.runtime.search_engine import search
 from openhands.runtime.utils.bash import BashSession
 from openhands.runtime.utils.files import insert_lines, read_lines
 from openhands.runtime.utils.memory_monitor import MemoryMonitor
@@ -163,7 +167,8 @@ class ActionExecutor:
         self.start_time = time.time()
         self.last_execution_time = self.start_time
         self._initialized = False
-
+        self.downloaded_files: list[str] = []
+        self.downloads_directory = '/workspace/downloads'
         self.max_memory_gb: int | None = None
         if _override_max_memory_gb := os.environ.get('RUNTIME_MAX_MEMORY_GB', None):
             self.max_memory_gb = int(_override_max_memory_gb)
@@ -462,7 +467,48 @@ class ActionExecutor:
         return await browse(action, self.browser)
 
     async def browse_interactive(self, action: BrowseInteractiveAction) -> Observation:
-        return await browse(action, self.browser)
+        browser_observation = await browse(action, self.browser)
+        if not browser_observation.error:
+            return browser_observation
+        else:
+            curr_files = os.listdir(self.downloads_directory)
+            new_download = False
+            for file in curr_files:
+                if file not in self.downloaded_files:
+                    new_download = True
+                    self.downloaded_files.append(file)
+                    break  # TODO: assuming only one file will be downloaded for simplicity
+            if not new_download:
+                return browser_observation
+            else:
+                # file is downloaded in self.downloads_directory, shift file to /workspace
+                src_path = os.path.join(
+                    self.downloads_directory, self.downloaded_files[-1]
+                )
+                # TODO: Guess extension of file using puremagic and add it to tgt_path file name
+                file_ext = ''
+                try:
+                    guesses = puremagic.magic_file(src_path)
+                    if len(guesses) > 0:
+                        ext = guesses[0].extension.strip()
+                        if len(ext) > 0:
+                            file_ext = ext
+                except Exception as _:
+                    pass
+
+                tgt_path = os.path.join(
+                    '/workspace', f'file_{len(self.downloaded_files)}{file_ext}'
+                )
+                shutil.copy(src_path, tgt_path)
+                file_download_obs = FileDownloadObservation(
+                    content=f'Execution of the previous action {action.browser_actions} resulted in a file download. The downloaded file is saved at location: {tgt_path}',
+                    file_path=tgt_path,
+                )
+                return file_download_obs
+
+    async def search(self, action: SearchAction) -> Observation:
+        obs = await call_sync_from_async(search, action)
+        return obs
 
     def close(self):
         self.memory_monitor.stop_monitoring()

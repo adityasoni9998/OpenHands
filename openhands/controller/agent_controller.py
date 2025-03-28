@@ -47,6 +47,7 @@ from openhands.events.observation import (
     AgentCondensationObservation,
     AgentDelegateObservation,
     AgentStateChangedObservation,
+    BrowserOutputObservation,
     ErrorObservation,
     NullObservation,
     Observation,
@@ -59,6 +60,21 @@ from openhands.llm.metrics import Metrics, TokenUsage
 TRAFFIC_CONTROL_REMINDER = (
     "Please click on resume button if you'd like to continue, or start a new task."
 )
+
+# TODO:
+# 1. Tune this prompt
+# 2. Should we add this prompt only when we detect loops? This will retain performance on previously solved tasks.
+PLANNING_PROMPT = """Based on the given task instructions and the conversation history containing your prior actions and their corresponding observations, please do the following:
+1. Prepare a list containing the following details:
+	(a) Facts given in the task
+	(b) Facts you have learnt in the previous steps that are crucial to solve this task
+	(c) Facts you need to look up using tools
+2. Develop a step-by-step high-level plan containing a list of sub-tasks you need to complete to solve this task. You MUST take into account the task instructions, your current progress, and the above list of facts.
+3. If you believe you have completed the task, STRICTLY follow the task instructions about generating your final answer using the finish tool.
+4. If you notice you've attempted the same action multiple times without success, analyze other alternatives to complete that sub-task.
+5. IMPORTANT: you should CONTINUE solving the task based on the above plan and the available tools. You should NEVER ask the user for help."""
+
+FINAL_ANSWER_PROMPT = """You have exhausted the maximum number of steps required to complete this task and now you MUST STRICTLY use the finish tool to provide your final answer for the given task. Do NOT use any other tool other than the finish tool. You MUST adhere to the output formatting instructions given by the user. You MUST provide a final answer even if you have are not sure about it or if you have not completed the verification steps."""
 
 
 class AgentController:
@@ -680,6 +696,29 @@ class AgentController:
             action = self._replay_manager.step()
         else:
             try:
+                # if this is the last step, force the agent to finish the interaction
+                if self.state.iteration + 1 == self.state.max_iterations:
+                    self.event_stream.add_event(
+                        MessageAction(
+                            content=FINAL_ANSWER_PROMPT, wait_for_response=False
+                        ),
+                        EventSource.USER,
+                    )
+                    return
+                elif (
+                    hasattr(self.agent, 'planning_interval')
+                    and self.agent.planning_interval is not None
+                    and self.state.iteration
+                    != self.state.max_iterations  # do not add planning prompt if this is the final step taken by the agent
+                ):
+                    if self.state.iteration % self.agent.planning_interval == 0:
+                        self.event_stream.add_event(
+                            MessageAction(
+                                content=PLANNING_PROMPT, wait_for_response=False
+                            ),
+                            EventSource.USER,
+                        )
+                        return
                 action = self.agent.step(self.state)
                 if action is None:
                     raise LLMNoActionError('No action was returned')
@@ -979,6 +1018,36 @@ class AgentController:
 
     def _handle_long_context_error(self) -> None:
         # When context window is exceeded, keep roughly half of agent interactions
+        last_event = self.state.history[-1]
+        if isinstance(last_event, BrowserOutputObservation):
+            # truncated_event = BrowserOutputObservation(
+            #     content=last_event.content,
+            #     url=last_event.url,
+            #     trigger_by_action=last_event.trigger_by_action,
+            #     screenshot=last_event.screenshot,
+            #     set_of_marks=last_event.set_of_marks,
+            #     error=last_event.error,
+            #     goal_image_urls=last_event.goal_image_urls,
+            #     open_pages_urls=last_event.open_pages_urls,
+            #     active_page_index=last_event.active_page_index,
+            #     dom_object=last_event.dom_object,
+            #     axtree_object=last_event.axtree_object,
+            #     extra_element_properties=last_event.extra_element_properties,
+            #     last_browser_action=last_event.last_browser_action,
+            #     last_browser_action_error=last_event.last_browser_action_error,
+            #     focused_element_bid=last_event.focused_element_bid
+            # )
+            # truncated_event.tool_call_metadata = last_event.tool_call_metadata
+            # truncated_event.filter_visible_only = True
+            last_event.filter_visible_only = True
+
+            self.event_stream.add_event(
+                AgentCondensationObservation(
+                    content='Trimming accessibility tree to only the visible portion of webpage to meet context window limitations'
+                ),
+                EventSource.AGENT,
+            )
+            return
         self.state.history = self._apply_conversation_window(self.state.history)
 
         # Save the ID of the first event in our truncated history for future reloading
