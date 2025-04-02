@@ -37,6 +37,7 @@ from openhands.events.action import (
     Action,
     BrowseInteractiveAction,
     BrowseURLAction,
+    ChatAction,
     CmdRunAction,
     FileEditAction,
     FileReadAction,
@@ -56,6 +57,7 @@ from openhands.events.observation import (
 from openhands.events.serialization import event_from_dict, event_to_dict
 from openhands.runtime.browser import browse
 from openhands.runtime.browser.browser_env import BrowserEnv
+from openhands.runtime.chat import ChatEnv, chat
 from openhands.runtime.plugins import ALL_PLUGINS, JupyterPlugin, Plugin, VSCodePlugin
 from openhands.runtime.utils.bash import BashSession
 from openhands.runtime.utils.file_viewer import generate_file_viewer_html
@@ -167,7 +169,7 @@ class ActionExecutor:
         self.start_time = time.time()
         self.last_execution_time = self.start_time
         self._initialized = False
-
+        self.chat_env = ChatEnv()
         self.max_memory_gb: int | None = None
         if _override_max_memory_gb := os.environ.get('RUNTIME_MAX_MEMORY_GB', None):
             self.max_memory_gb = int(_override_max_memory_gb)
@@ -505,6 +507,9 @@ class ActionExecutor:
     async def browse_interactive(self, action: BrowseInteractiveAction) -> Observation:
         await self._ensure_browser_ready()
         return await browse(action, self.browser)
+
+    async def chat(self, action: ChatAction):
+        return await chat(action=action, chat_env=self.chat_env)
 
     def close(self):
         self.memory_monitor.stop_monitoring()

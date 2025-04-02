@@ -22,6 +22,12 @@ class AgentConfig(BaseModel):
         enable_som_visual_browsing: Whether to enable SoM (Set of Marks) visual browsing. Default is False.
     """
 
+    # FIXME: we need to adjust this config when we run the agent
+    """
+        1. enable_som_visual_browsing = True
+        2. condenser = BrowserCondenserConfig(k=1)
+        3. enable_chat_tool = True
+    """
     llm_config: str | None = Field(default=None)
     codeact_enable_browsing: bool = Field(default=True)
     codeact_enable_llm_editor: bool = Field(default=False)
@@ -29,10 +35,9 @@ class AgentConfig(BaseModel):
     enable_prompt_extensions: bool = Field(default=True)
     disabled_microagents: list[str] = Field(default_factory=list)
     enable_history_truncation: bool = Field(default=True)
-    enable_som_visual_browsing: bool = Field(default=True)
-    condenser: CondenserConfig = Field(
-        default_factory=lambda: NoOpCondenserConfig(type='noop')
-    )
+    enable_som_visual_browsing: bool = Field(default=False)
+    enable_chat_tool: bool = Field(default=False)
+    condenser: CondenserConfig = Field(default_factory=NoOpCondenserConfig)
 
     model_config = {'extra': 'forbid'}
 
