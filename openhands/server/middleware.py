@@ -148,7 +148,9 @@ class AttachConversationMiddleware(SessionMiddlewareInterface):
         Attach the user's session based on the provided authentication token.
         """
         request.state.conversation = (
-            await shared.conversation_manager.attach_to_conversation(request.state.sid)
+            await shared.conversation_manager.attach_to_conversation(
+                request.state.sid, get_user_id(request)
+            )
         )
         if not request.state.conversation:
             return JSONResponse(
@@ -183,7 +185,7 @@ class AttachConversationMiddleware(SessionMiddlewareInterface):
         return response
 
 
-class GitHubTokenMiddleware(SessionMiddlewareInterface):
+class ProviderTokenMiddleware(SessionMiddlewareInterface):
     def __init__(self, app):
         self.app = app
 
