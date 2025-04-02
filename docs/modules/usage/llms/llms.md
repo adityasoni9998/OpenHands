@@ -41,7 +41,7 @@ The following can be set in the OpenHands UI through the Settings:
 - `Base URL` (through `Advanced` settings)
 
 There are some settings that may be necessary for some LLMs/providers that cannot be set through the UI. Instead, these
-can be set through environment variables passed to the [docker run command](/modules/usage/installation#start-the-app)
+can be set through environment variables passed to the docker run command when starting the app
 using `-e`:
 
 - `LLM_API_VERSION`
@@ -59,6 +59,7 @@ We have a few guides for running OpenHands with specific model providers:
 - [LiteLLM Proxy](llms/litellm-proxy)
 - [OpenAI](llms/openai-llms)
 - [OpenRouter](llms/openrouter)
+- [Local LLMs with SGLang or vLLM](llms/../local-llms.md)
 
 ### API retries and rate limits
 

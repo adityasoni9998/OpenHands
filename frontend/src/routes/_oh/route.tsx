@@ -20,7 +20,6 @@ import { useAuth } from "#/context/auth-context";
 import { useMigrateUserConsent } from "#/hooks/use-migrate-user-consent";
 import { useBalance } from "#/hooks/query/use-balance";
 import { SetupPaymentModal } from "#/components/features/payment/setup-payment-modal";
-import { BILLING_SETTINGS } from "#/utils/feature-flags";
 import { displaySuccessToast } from "#/utils/custom-toast-handlers";
 
 export function ErrorBoundary() {
@@ -59,7 +58,7 @@ export default function MainApp() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const { githubTokenIsSet } = useAuth();
+  const { providersAreSet } = useAuth();
   const { data: settings } = useSettings();
   const { error, isFetching } = useBalance();
   const { migrateUserConsent } = useMigrateUserConsent();
@@ -132,7 +131,7 @@ export default function MainApp() {
 
       {renderWaitlistModal && (
         <WaitlistModal
-          ghTokenIsSet={githubTokenIsSet}
+          ghTokenIsSet={providersAreSet}
           githubAuthUrl={gitHubAuthUrl}
         />
       )}
@@ -145,7 +144,7 @@ export default function MainApp() {
         />
       )}
 
-      {BILLING_SETTINGS() &&
+      {config.data?.FEATURE_FLAGS.ENABLE_BILLING &&
         config.data?.APP_MODE === "saas" &&
         settings?.IS_NEW_USER && <SetupPaymentModal />}
     </div>
