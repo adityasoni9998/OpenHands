@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 
+from openhands.core.schema import ObservationType
 from openhands.events.observation.observation import Observation
 
 
 @dataclass
 class ChatObservation(Observation):
     npc_name: str
+    observation: str = ObservationType.CHAT
 
     @property
     def message(self) -> str:

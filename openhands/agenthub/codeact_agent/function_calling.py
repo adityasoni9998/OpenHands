@@ -240,6 +240,7 @@ def get_tools(
     codeact_enable_browsing: bool = False,
     codeact_enable_llm_editor: bool = False,
     codeact_enable_jupyter: bool = False,
+    codeact_enable_chat_tool: bool = False,
     llm: LLM | None = None,
 ) -> list[ChatCompletionToolParam]:
     SIMPLIFIED_TOOL_DESCRIPTION_LLM_SUBSTRS = ['gpt-', 'o3', 'o1']
@@ -256,7 +257,9 @@ def get_tools(
         ThinkTool,
         FinishTool,
     ]
+    # FIXME: do we want a search engine tool? I have a PR here: https://github.com/All-Hands-AI/OpenHands/pull/7262
     if codeact_enable_browsing:
+        # FIXME: disable web-read tool, it reduces quality of browsing
         tools.append(WebReadTool)
         tools.append(BrowserTool)
     if codeact_enable_jupyter:
@@ -269,4 +272,6 @@ def get_tools(
                 use_simplified_description=use_simplified_tool_desc
             )
         )
+    if codeact_enable_chat_tool:
+        tools.append(ChatNPCTool)
     return tools

@@ -11,6 +11,7 @@ from openhands.events.action import (
     AgentThinkAction,
     BrowseInteractiveAction,
     BrowseURLAction,
+    ChatAction,
     CmdRunAction,
     FileEditAction,
     FileReadAction,
@@ -23,6 +24,7 @@ from openhands.events.observation import (
     AgentDelegateObservation,
     AgentThinkObservation,
     BrowserOutputObservation,
+    ChatObservation,
     CmdOutputObservation,
     FileEditObservation,
     FileReadObservation,
@@ -191,6 +193,7 @@ class ConversationMemory:
                 FileReadAction,
                 BrowseInteractiveAction,
                 BrowseURLAction,
+                ChatAction,
             ),
         ) or (isinstance(action, CmdRunAction) and action.source == 'agent'):
             tool_metadata = action.tool_call_metadata
@@ -343,6 +346,14 @@ class ConversationMemory:
             message = Message(
                 role='user', content=[TextContent(text=obs.content)]
             )  # Content is already truncated by openhands-aci
+        elif isinstance(obs, ChatObservation):
+            npc_name: str = obs.npc_name
+            msg_content: str = obs.content
+            # FIXME: any thoughts about the exact message we show to the LLM?
+            message = Message(
+                role='user',
+                content=[TextContent(text=f'Response from {npc_name}: {msg_content}')],
+            )
         elif isinstance(obs, BrowserOutputObservation):
             text = obs.get_agent_obs_text()
             if (
