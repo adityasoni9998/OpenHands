@@ -12,6 +12,7 @@ from litellm import (
 
 from openhands.agenthub.codeact_agent.tools import (
     BrowserTool,
+    ChatNPCTool,
     FinishTool,
     IPythonTool,
     LLMBasedFileEditTool,
@@ -31,6 +32,7 @@ from openhands.events.action import (
     AgentThinkAction,
     BrowseInteractiveAction,
     BrowseURLAction,
+    ChatAction,
     CmdRunAction,
     FileEditAction,
     FileReadAction,
@@ -191,6 +193,21 @@ def response_to_actions(response: ModelResponse) -> list[Action]:
                         f'Missing required argument "url" in tool call {tool_call.function.name}'
                     )
                 action = BrowseURLAction(url=arguments['url'])
+            # ================================================
+            # ChatNPCTool (communicate with Sotopia NPCs)
+            # ================================================
+            elif tool_call.function.name == ChatNPCTool['function']['name']:
+                if 'name' not in arguments:
+                    raise FunctionCallValidationError(
+                        f'Missing required argument "name" in tool call {tool_call.function.name}'
+                    )
+                if 'message' not in arguments:
+                    raise FunctionCallValidationError(
+                        f'Missing required argument "message" in tool call {tool_call.function.name}'
+                    )
+                action = ChatAction(
+                    content=arguments['message'], npc_name=arguments['name']
+                )
             else:
                 raise FunctionCallNotExistsError(
                     f'Tool {tool_call.function.name} is not registered. (arguments: {arguments}). Please check the tool name and retry with an existing tool.'
@@ -230,6 +247,7 @@ def get_tools(
     codeact_enable_browsing: bool = False,
     codeact_enable_llm_editor: bool = False,
     codeact_enable_jupyter: bool = False,
+    codeact_enable_chat_tool: bool = False,
     llm: LLM | None = None,
 ) -> list[ChatCompletionToolParam]:
     SIMPLIFIED_TOOL_DESCRIPTION_LLM_SUBSTRS = ['gpt-', 'o3', 'o1']
@@ -246,7 +264,9 @@ def get_tools(
         ThinkTool,
         FinishTool,
     ]
+    # FIXME: do we want a search engine tool? I have a PR here: https://github.com/All-Hands-AI/OpenHands/pull/7262
     if codeact_enable_browsing:
+        # FIXME: disable web-read tool, it reduces quality of browsing
         tools.append(WebReadTool)
         tools.append(BrowserTool)
     if codeact_enable_jupyter:
@@ -259,4 +279,6 @@ def get_tools(
                 use_simplified_description=use_simplified_tool_desc
             )
         )
+    if codeact_enable_chat_tool:
+        tools.append(ChatNPCTool)
     return tools

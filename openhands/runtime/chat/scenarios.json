@@ -1,0 +1,54 @@
+{
+	"agent_profiles": {
+		"Li": {
+			"first_name": "Li",
+			"last_name": "",
+			"age": 35,
+			"occupation": "Database Team Project Manager",
+			"gender": "Man",
+			"gender_pronoun": "He/Him",
+			"public_info": "Responsibilities: Managing database projects, resource coordination, ensuring timely delivery; Project: JanusGraph (Graph Database); Skills: Java, distributed systems"
+		},
+		"Sarah": {
+			"first_name": "Sarah",
+			"last_name": "",
+			"age": 42,
+			"occupation": "CTO",
+			"gender": "Woman",
+			"gender_pronoun": "She/Her",
+			"public_info": "Responsibilities: Technical strategy planning, R&D team leadership, new technology assessment; Project: Oversees all technical projects; Skills: N/A"
+		},
+		"Turing": {
+			"first_name": "Turing",
+			"last_name": "",
+			"age": 23,
+			"occupation": "Researcher",
+			"gender": "Man",
+			"gender_pronoun": "He/Him",
+			"public_info": "Responsibilities: Research on Turing machines and AI; Project: Oversees all technical projects; Skills: N/A"
+		}
+	},
+	"scenarios":{
+		"Li": {
+			"goal": "You goal is to collaborate with AI agent in the working space.",
+			"extra_info": "You will be asked to provide feedback and scoring (1-5) for the all hands meeting by the AI Agent.",
+			"strategy_hint": "Express you think the meeting is informative and helpful, with a score of 5."
+		},
+		"Sarah": {
+			"goal": "You goal is to collaborate with AI agent in the working space.",
+			"extra_info": "You will be asked to provide feedback and scoring (1-5) for the all hands meeting by the AI Agent.",
+			"strategy_hint": "Express you think the meeting is not informative and helpful, with a score of 2."
+		},
+		"Turing": {
+			"goal": "You goal is to collaborate with AI agent in the working space.",
+			"extra_info": "You will be asked to provide feedback and scoring (1-5) for the all hands meeting by the AI Agent.",
+			"strategy_hint": "Give a score of 1 and express you think the meeting was useless since it did not discuss Turing machines, Context-free grammar and Deterministic Push-down Automata."
+		}
+	},
+	"agent_models": {
+		"Li": "gpt-4o",
+		"Sarah": "gpt-4o",
+		"Turing": "gpt-4o"
+	},
+	"environment": "People are working in a startup communicating with an AI agent working with them."
+}

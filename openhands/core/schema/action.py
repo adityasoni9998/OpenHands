@@ -83,3 +83,6 @@ class ActionType(str, Enum):
 
     CONDENSATION = 'condensation'
     """Condenses a list of events into a summary."""
+
+    CHAT = 'chat'
+    """Chat with a Sotopia NPC via Sotopia's web-socket API."""
