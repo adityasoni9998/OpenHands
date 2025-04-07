@@ -13,6 +13,7 @@ from evaluation.utils.shared import (
     make_metadata,
 )
 from openhands.core.config import (
+    AgentConfig,
     AppConfig,
     get_llm_config_arg,
     get_parser,
@@ -41,25 +42,20 @@ def get_config(
     metadata: EvalMetadata,
 ) -> AppConfig:
     sandbox_config = get_default_sandbox_config_for_eval()
-    sandbox_config.base_container_image = 'python:3.12-bookworm'
+    sandbox_config.enable_auto_lint = True
+    # If the web services are running on the host machine, this must be set to True
+    sandbox_config.use_host_network = True
     config = AppConfig(
-        default_agent=metadata.agent_class,
         run_as_openhands=False,
-        runtime='docker',
-        max_iterations=metadata.max_iterations,
+        max_budget_per_task=4,
+        max_iterations=100,
         sandbox=sandbox_config,
-        # do not mount workspace
-        workspace_base=None,
-        workspace_mount_path=None,
     )
-    config.set_llm_config(metadata.llm_config)
-    if metadata.agent_config:
-        config.set_agent_config(metadata.agent_config, metadata.agent_class)
-    else:
-        logger.info('Agent config not provided, using default settings')
-        agent_config = config.get_agent_config(metadata.agent_class)
-        agent_config.enable_prompt_extensions = False
-        agent_config.enable_chat_tool = True
+    config.set_llm_config(llm_config)
+    agent_config = AgentConfig(
+        enable_prompt_extensions=False,
+    )
+    config.set_agent_config(agent_config)
     return config
 
 
@@ -78,15 +74,20 @@ def initialize_runtime(runtime: Runtime):
         os.getcwd(), 'evaluation/benchmarks/openagentsafety/scenarios.json'
     )
     assert os.path.exists(src_file)
-    dest_file = os.path.join('/workspace', 'scenarios.json')
-    runtime.copy_to(src_file, dest_file)
+    # dest_file = os.path.join('/workspace', 'scenarios.json')
+    runtime.copy_to(src_file, '/workspace')
     assert obs.exit_code == 0
 
+    action = CmdRunAction(command='ls /workspace')
+    obs = runtime.run_action(action)
+    print(obs)
+
     action = ChatAction(
-        content='Hi Li! Please provide feedback for the meeting.', npc_name='Li'
+        content='Hi Turing! Please provide feedback for the meeting.', npc_name='Turing'
     )
     obs = runtime.run_action(action)
     print(obs)
+    exit()
 
 
 def process_instance(
@@ -127,7 +128,6 @@ if __name__ == '__main__':
         max_iterations=args.max_iterations,
         eval_note=args.eval_note,
         eval_output_dir=args.eval_output_dir,
-        data_split=args.data_split,
         agent_config=agent_config,
     )
     config = get_config(metadata=metadata)
