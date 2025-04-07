@@ -17,7 +17,7 @@ class ChatEnv:
             'WEBSOCKET_URL', f'ws://localhost:8080/ws/simulation?token={TOKEN}'
         )
         self.scenarios_file: str = os.environ.get(
-            'SCENARIOS_FILE', '/workspace/scenarios.json'
+            'SCENARIOS_FILE', '/npc/scenarios.json'
         )
         self.session: ClientSession = aiohttp.ClientSession()
         self.started_env: bool = False
