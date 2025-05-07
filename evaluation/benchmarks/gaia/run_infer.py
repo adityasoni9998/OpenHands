@@ -222,6 +222,7 @@ def process_instance(
         error=state.last_error if state and state.last_error else None,
         test_result=test_result,
     )
+    runtime.close()
     return output
 
 
