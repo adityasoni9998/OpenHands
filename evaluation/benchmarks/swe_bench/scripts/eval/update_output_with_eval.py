@@ -34,16 +34,16 @@ if os.path.exists(swebench_official_report_json):
         report = json.load(f)
 
     output_md = (
-        "# SWE-bench Report\n"
-        "This folder contains the evaluation results of the SWE-bench using the [official evaluation docker containerization](https://github.com/princeton-nlp/SWE-bench/blob/main/docs/20240627_docker/README.md#choosing-the-right-cache_level).\n\n"
-        "## Summary\n"
-        f"- total instances: {report['total_instances']}\n"
-        f"- submitted instances: {report['submitted_instances']}\n"
-        f"- completed instances: {report['completed_instances']}\n"
-        f"- empty patch instances: {report['empty_patch_instances']}\n"
-        f"- resolved instances: {report['resolved_instances']}\n"
-        f"- unresolved instances: {report['unresolved_instances']}\n"
-        f"- error instances: {report['error_instances']}\n"
+        '# SWE-bench Report\n'
+        'This folder contains the evaluation results of the SWE-bench using the [official evaluation docker containerization](https://github.com/princeton-nlp/SWE-bench/blob/main/docs/20240627_docker/README.md#choosing-the-right-cache_level).\n\n'
+        '## Summary\n'
+        f'- total instances: {report["total_instances"]}\n'
+        f'- submitted instances: {report["submitted_instances"]}\n'
+        f'- completed instances: {report["completed_instances"]}\n'
+        f'- empty patch instances: {report["empty_patch_instances"]}\n'
+        f'- resolved instances: {report["resolved_instances"]}\n'
+        f'- unresolved instances: {report["unresolved_instances"]}\n'
+        f'- error instances: {report["error_instances"]}\n'
     )
 
     output_md += '\n## Resolved Instances\n'
@@ -152,7 +152,7 @@ elif os.path.exists(openhands_remote_report_jsonl):
 
     # Generate markdown report
     def _instance_id_to_log_path(instance_id):
-        path = f"{args.input_file.replace('.jsonl', '.swebench_eval.logs')}/instance_{instance_id}.log"
+        path = f'{args.input_file.replace(".jsonl", ".swebench_eval.logs")}/instance_{instance_id}.log'
         return os.path.relpath(path, start=dirname)
 
     # ... rest of markdown generation code remains the same ...
@@ -228,9 +228,10 @@ if os.path.exists(args.input_file + '.bak'):
 os.rename(args.input_file, args.input_file + '.bak')
 
 # Process and write file row by row
-with open(args.input_file + '.bak', 'r') as infile, open(
-    args.input_file, 'w'
-) as outfile:
+with (
+    open(args.input_file + '.bak', 'r') as infile,
+    open(args.input_file, 'w') as outfile,
+):
     for line in tqdm(infile, desc='Updating output file'):
         data = json.loads(line)
         instance_id = data['instance_id']
