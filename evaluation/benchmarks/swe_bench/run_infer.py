@@ -108,7 +108,7 @@ Follow these steps to reproduce the issue:
 /workspace/{workspace_dir_name}
 </uploaded_files>
 
-I've uploaded a python code repository in the directory {workspace_dir_name}. Consider the following issue description:
+I've uploaded a javascript code repository in the directory {workspace_dir_name}. Consider the following issue description:
 
 <issue_description>
 {instance.problem_statement}
