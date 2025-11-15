@@ -43,6 +43,7 @@ LLM_RETRY_EXCEPTIONS: tuple[type[Exception], ...] = (RateLimitError,)
 # remove this when we gemini and deepseek are supported
 CACHE_PROMPT_SUPPORTED_MODELS = [
     'claude-3-7-sonnet-20250219',
+    'claude-3-7-sonnet-20250219-v1:0',
     'claude-3-5-sonnet-20241022',
     'claude-3-5-sonnet-20240620',
     'claude-3-5-haiku-20241022',
@@ -63,6 +64,8 @@ FUNCTION_CALLING_SUPPORTED_MODELS = [
     'o1-2024-12-17',
     'o3-mini-2025-01-31',
     'o3-mini',
+    'gpt-5',
+    'claude-3-7-sonnet-20250219-v1:0',
 ]
 
 REASONING_EFFORT_SUPPORTED_MODELS = [
@@ -70,6 +73,7 @@ REASONING_EFFORT_SUPPORTED_MODELS = [
     'o1',
     'o3-mini-2025-01-31',
     'o3-mini',
+    'gpt-5',
 ]
 
 MODELS_WITHOUT_STOP_WORDS = [
